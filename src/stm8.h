@@ -250,6 +250,15 @@
 #define I2C_TRISER *(volatile unsigned char *)0x521D
 #define I2C_PECR *(volatile unsigned char *)0x521E
 
+#define I2C_CR2_START   (1 << 0)
+#define I2C_CR2_STOP    (1 << 1)
+
+#define I2C_SR1_SB      (1 << 0)
+#define I2C_SR1_RXNE    (1 << 6)
+#define I2C_SR1_TXE     (1 << 7)
+
+#define I2C_SR3_MSL     (1 << 0)
+
 /* ADC */
 #define ADC_DBxR *(volatile unsigned char *)0x53E0
 #define ADC_CSR *(volatile unsigned char *)0x5400
