@@ -24,6 +24,10 @@
 /* Clock */
 #define CLK_CKDIVR	*(volatile unsigned char *)0x50C6
 
+#define CLK_PCKENR1 *(volatile unsigned char *)0x50C7
+
+#define PCKEN10 (1 << 0)
+
 /* GPIO */
 #define PA_ODR *(volatile unsigned char *)0x5000
 #define PA_IDR *(volatile unsigned char *)0x5001
@@ -252,8 +256,10 @@
 
 #define I2C_CR2_START   (1 << 0)
 #define I2C_CR2_STOP    (1 << 1)
+#define I2C_CR2_ACK     (1 << 2)
 
 #define I2C_SR1_SB      (1 << 0)
+#define I2C_SR1_ADDR    (1 << 1)
 #define I2C_SR1_RXNE    (1 << 6)
 #define I2C_SR1_TXE     (1 << 7)
 

@@ -2,7 +2,7 @@ CC=sdcc
 CFLAGS=--std-sdcc99
 CFLAGS+=-mstm8
 CFLAGS+=-lstm8
-CFLAGS+=--out-fmt-ihx
+CFLAGS+=--debug
 
 OBJS=*.map
 OBJS+=*.rel
@@ -13,9 +13,14 @@ OBJS+=*.asm
 OBJS+=*.cdb
 OBJS+=*.ihx
 OBJS+=*.lk
+OBJS+=*.adb
+OBJS+=*.elf
 
 all: src/main.c
-	$(CC) $(CFLAGS) src/main.c
+	$(CC) $(CFLAGS) --out-fmt-ihx --nogcse --all-callee-saves --verbose --stack-auto --fverbose-asm --float-reent --no-peep src/main.c
+
+debug: src/main.c
+	$(CC) $(CFLAGS) --out-fmt-elf --all-callee-saves --verbose --stack-auto --fverbose-asm --float-reent --no-peep src/main.c
 
 .PHONY: clean
 clean:
