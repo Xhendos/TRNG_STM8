@@ -11,6 +11,12 @@
 /* MPU6050 register addresses */
 #define PWR_MGMT_1      (0x6B)
 #define WHO_AM_I        (0x75)
+#define ACCEL_X_HIGH    (0x3B)
+#define ACCEL_X_LOW     (0x3C)
+#define ACCEL_Y_HIGH    (0x3D)
+#define ACCEL_Y_LOW     (0x3E)
+#define ACCEL_Z_HIGH    (0x3F)
+#define ACCEL_Z_LOW     (0x40)
 
 /* i2c functions */
 void i2c_init(void)
@@ -69,11 +75,36 @@ uint8_t i2c_read_byte(void)
     return ret;
 }
 
+/* Higher abstraction level i2c functions */
+void i2c_request_read_from_register(uint8_t address, uint8_t i2c_register)
+{
+    i2c_start();
+    i2c_write_addr(address);
+    i2c_write(i2c_register);
+    i2c_stop();
+}
+
+uint8_t i2c_do_read_from_register(uint8_t address)
+{
+    uint8_t ret;
+
+    i2c_start();
+    i2c_write_addr(address);
+    ret = i2c_read_byte();
+    
+    return ret;
+}
+
 /* Main program */
 int main(void)
 {
     uint8_t received_byte;      /* Hold received byte sent by host PC */
     uint8_t who_am_i;           /* who_am_i read from the MPU6050 */
+    volatile uint16_t accel_x = 0;           
+    volatile uint16_t accel_y = 0;
+    volatile uint16_t accel_z = 0;
+    uint8_t random_byte;        /* Random byte calculated by ((X & 0x3) << 6) ^ (Z << 4) ^ (Y << 2) ^ X ^ (Z >> 2) */
+    
 
     CLK_CKDIVR = 0;     /* Clock is 16 MHz */
     CLK_PCKENR1 |= PCKEN10;
@@ -97,18 +128,13 @@ int main(void)
     i2c_write(PWR_MGMT_1);
     i2c_write(0);
     i2c_stop(); 
-     
+    
     /* Request to read from WHO_AM_I register. The value in this register should be 0110 1000 */
-    i2c_start();
-    i2c_write_addr(MPU6050_ADDR + I2C_WRITE);
-    i2c_write(WHO_AM_I);
-    i2c_stop();
-
+    i2c_request_read_from_register(MPU6050_ADDR + I2C_WRITE, WHO_AM_I);
+    
     /* Read the actual value from the WHO_AM_I register */
-    i2c_start();
-    i2c_write_addr(MPU6050_ADDR + I2C_READ);
-    who_am_i = i2c_read_byte();
-
+    who_am_i = i2c_do_read_from_register(MPU6050_ADDR + I2C_READ);
+    
     if(who_am_i != 104) /* If no MPU6050 sensor found quit the program execution */
         return 1;
 
@@ -122,13 +148,30 @@ int main(void)
             
             if(received_byte == 'A')            
             {
-                /* Send message via i2c */
-       
-                /* Read i2c response */
+                accel_x = accel_y = accel_z = 0;    /* clear variables */
+
+                /* Send message via i2c to get the X, Y and Z from the accelerometer */
+                i2c_request_read_from_register(MPU6050_ADDR + I2C_WRITE, ACCEL_X_HIGH);
+                accel_x = i2c_do_read_from_register(MPU6050_ADDR + I2C_READ) << 8;
+                i2c_request_read_from_register(MPU6050_ADDR + I2C_WRITE, ACCEL_X_LOW);
+                accel_x |= i2c_do_read_from_register(MPU6050_ADDR + I2C_READ);
+
+                i2c_request_read_from_register(MPU6050_ADDR + I2C_WRITE, ACCEL_Y_HIGH);
+                accel_y = i2c_do_read_from_register(MPU6050_ADDR + I2C_READ) << 8;
+                i2c_request_read_from_register(MPU6050_ADDR + I2C_WRITE, ACCEL_Y_LOW);
+                accel_y |= i2c_do_read_from_register(MPU6050_ADDR + I2C_READ);
+
+                i2c_request_read_from_register(MPU6050_ADDR + I2C_WRITE, ACCEL_Z_LOW);
+                accel_z = i2c_do_read_from_register(MPU6050_ADDR + I2C_READ) << 8;
+                i2c_request_read_from_register(MPU6050_ADDR + I2C_WRITE, ACCEL_Z_LOW);
+                accel_z |= i2c_do_read_from_register(MPU6050_ADDR + I2C_READ);
+
+                /* Calculate the random byte */
+                random_byte = ((accel_x & 0x3) << 6) ^ (accel_z << 4) ^ (accel_y << 2) ^ accel_x ^ (accel_z >> 2);
 
                 /* Send response via UART to host PC */
                 
-                UART1_DR = 'B';
+                UART1_DR = random_byte;
             }
         }
        
