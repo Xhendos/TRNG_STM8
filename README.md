@@ -15,7 +15,7 @@ This repository contains both the software and the hardware files to make a True
 # Table of Contents
 1. [Dependencies](#Dependencies)
 2. [Renders (PCB)](#Renders)
-3. [Use case](#Use case)
+3. [Use case](#Usecase)
 
 ## Dependencies
 
