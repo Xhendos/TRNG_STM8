@@ -52,4 +52,26 @@ The pull-up resistors for SDA and SCL are R1 and R2.
 
 ## Use case
 
+Old school RuneScape is a [MMORPG](https://en.wikipedia.org/wiki/Massively_multiplayer_online_role-playing_game) where a virtual character has skills. Those skills are trainable.
+One of the skills is called 'Magic'.
+There are multiple ways to train Magic but an easy way is alching items using the High Level Alchemy spell.
+If the player sets the item in the correct slot in the invetory the player does not have to move the mouse position.
+This means the player only has to press the left mouse key in order to select the spell and then press another mouse click to select the item to alch.
+A player using a PRNG to generate random delays between mouse clicks might get banned by the [Botwatch](https://runescape.fandom.com/wiki/Botwatch).
+This is a use case where the TRNG is superiour.
+Keep in mind that using software to automate actions in the game is [illegal](https://www.runescape.com/game-guide/rules) and I take no responsibilities for damage an individual or group causes after using any content find in this repository.
 
+<p align=center>
+<img src="img/RS_magic_step_1.jpeg" height="240"> </img>
+</p>
+<p>
+    <em>Magic spell book where the High Level Alchemy spell is the icon with the three yellow dots</em>
+</p>
+
+
+<p align=center>
+<img src="img/RS_magic_step_2.jpeg" height="240"> </img>
+</p>
+<p>
+    <em>The noted Rune 2h sword item is relatively on the same spot as the High Level Alchemy spell</em>
+</p>
