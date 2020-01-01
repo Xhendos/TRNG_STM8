@@ -170,7 +170,6 @@ int main(void)
                 random_byte = ((accel_x & 0x3) << 6) ^ (accel_z << 4) ^ (accel_y << 2) ^ accel_x ^ (accel_z >> 2);
 
                 /* Send response via UART to host PC */
-                
                 UART1_DR = random_byte;
             }
         }
