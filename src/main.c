@@ -104,10 +104,16 @@ int main(void)
     volatile uint16_t accel_y = 0;
     volatile uint16_t accel_z = 0;
     uint8_t random_byte;        /* Random byte calculated by ((X & 0x3) << 6) ^ (Z << 4) ^ (Y << 2) ^ X ^ (Z >> 2) */
-    
+    uint8_t iterations; 
+
+    volatile uint16_t init_delay = 65535;
 
     CLK_CKDIVR = 0;     /* Clock is 16 MHz */
     CLK_PCKENR1 |= PCKEN10;
+
+    /* A small initial delay so peripherals can initialise
+     * after voltage has been applied */
+    while(init_delay--);
 
     i2c_init();         /* Initialise the i2c module */
     
@@ -115,7 +121,6 @@ int main(void)
      * 16 000 000 / 9600 = 1667. This converted to hex is 0x0683.
      * BRR1 thus should be  0x68.
      * BRR2[3:0] should be 0x3 and BRR2[15:12] should be 0x0 */
-    
     UART1_BRR1 = 0x68;
     UART1_BRR2 = 0x03;
     
@@ -145,8 +150,8 @@ int main(void)
         if(UART1_SR & UART_SR_RXNE)
         {
             received_byte = UART1_DR;    /* At this point the host PC sended a byte. Let's read it */
-            
-            if(received_byte == 'A')            
+           
+            for(iterations = 0; iterations < received_byte; iterations += 1)
             {
                 accel_x = accel_y = accel_z = 0;    /* clear variables */
 
@@ -169,6 +174,7 @@ int main(void)
                 /* Calculate the random byte */
                 random_byte = ((accel_x & 0x3) << 6) ^ (accel_z << 4) ^ (accel_y << 2) ^ accel_x ^ (accel_z >> 2);
 
+                while(!(UART1_SR & UART_SR_TXE));
                 /* Send response via UART to host PC */
                 UART1_DR = random_byte;
             }
@@ -178,6 +184,5 @@ int main(void)
         while(!(UART1_SR & UART_SR_TXE));
     }
 
-    
     return 0;
 }
